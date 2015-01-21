@@ -1,0 +1,24 @@
+Dataset: "job.csv"
+Fan Jia 2011-08-12
+
+Description: 
+The data are comprised of scores from 480 employees on eight work-related variables.
+
+Variable names:
+  ID = EMPLOYEE ID;
+  AGE = EMPLOYEE AGE;
+  TENURE = YEARS ON THE JOB;
+  FEMALE = GENDER (0 = MALE, 1 = FEMALE);
+  WBEING = PSYCHOLOGICAL WELL-BEING;
+  SATIS = JOB SATISFACTION
+  JOBPERF = JOB PERFORMANCE;
+  TURNOVER = TURNOVER INTENTIONS (0 = NO, 1 = YES);
+  IQ = IQ SCORE;
+
+
+Reference:
+Enders, Craig K.(2010), Applied Missing Data Analysis, New York, YN: The Guilford Press.
+www.appliedmissingdata.com
+
+Authorization:
+free to download
