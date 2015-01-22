@@ -225,10 +225,13 @@ mydata <- rnorm (1000, 0, 1)
 hist(mydata) # frequencies on Y-axis
 hist(mydata, prob=TRUE) # proportions on Y-axis
 hist(mydata, prob=TRUE, xlab="X-Variable Name") # Label the X-axis
-hist(mydata, prob=TRUE, xlab="X-Variable Name", ylab="Proportion of Cases") # Label the Y-axis
-hist(mydata, prob=TRUE, xlab="X-Variable Name", ylab="Proportion of Cases", main="My First Histogram") 
+hist(mydata, prob=TRUE, xlab="X-Variable Name", 
+     ylab="Proportion of Cases") # Label the Y-axis
+hist(mydata, prob=TRUE, xlab="X-Variable Name", 
+     ylab="Proportion of Cases", main="My First Histogram") 
     # Gives the figure a title
-hist(mydata, prob=TRUE, xlab="X-Variable Name", ylab="Proportion of Cases", breaks=50) 
+hist(mydata, prob=TRUE, xlab="X-Variable Name", 
+     ylab="Proportion of Cases", breaks=50) 
     # sets the number of bins
 
 lines(density(mydata)) # add a kernel density plot 
@@ -259,7 +262,8 @@ rm(list = ls(all = TRUE)) # delete all objects
 
 ## You can get all kinds of information about your objects
 ## Let's use the histogram object as an example
-h1 <- hist(mydata, prob=TRUE, xlab="X-Variable Name", ylab="Proportion of Cases", 
+h1 <- hist(mydata, prob=TRUE, xlab="X-Variable Name", 
+           ylab="Proportion of Cases", 
            main="My First Histogram", breaks=10) 
 h1
 attributes(h1) 
