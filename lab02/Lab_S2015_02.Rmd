@@ -1,0 +1,371 @@
+---
+title: "Lab 2 - Reading and Exploring Data"
+author: "P. Johnson, L. Shaw, B. Rogers"
+date: "Wednesday, February 4, 2015"
+output: ioslides_presentation
+
+---
+
+## Office hours
+
+- Homework-a-palooza on Mondays 11:30a - 1:30p in Fraser 458
+- Tuesday 9:30a - 11:00a Dr. Johnson at the CRMDA
+- Tuesday 1:30p - 3:00p Ben's office Blake 311
+- Wednesday 10:00a - 11:00a Leslie's office Fraser 10
+- Thursday 3:00p - 5:00p Dr. Johnson at the CRMDA
+- Friday 1:30p - 3:00p Repeat lab Blake 114
+
+## First homework due Feb. 11 at 5pm
+
+- You can get half credit by attempting to answer each question, whether correct or not.
+    + if asked for code, provide code
+    + if asked for a table, provide table
+    + if asked for plot, provide a plot
+    + etc.
+- If you minimally answer each question correctly, you can get a B
+- You need to demonstrate a deeper understanding in your answer to get full points
+
+## To do
+- Accessing internal data sets
+- Creating data frames
+- Reading and writing data
+- Accessing specific entries in data
+- Getting to know your data
+- Plots
+
+## Internal data sets
+```{r eval = FALSE}
+install.packages("UsingR") # install UsingR package
+```
+```{r}
+library(UsingR) # load the package to R session
+```
+
+## Look at objects in workspace
+```{r}
+help(package="UsingR") # take a look at what's in the package
+ls()   # look at the list of objects in the workspace
+```
+- Do you see more than just the babies data set?
+- Maybe you need to clear your workspace
+```{r eval = FALSE}
+rm(list = ls())
+```
+
+## Looking at whole data set
+```{r}
+babies  # simply type the name of the data frame
+```
+
+## Look at first 6 rows
+- Use ?head to find out how to see more or less rows
+```{r}
+head(babies) # show the first 6 rows
+```
+
+## Look at first 6 rows
+- Use colnames or rownames function so you know how to refer to your data
+```{r}
+colnames(babies) # returns column names. Also see rownames()
+```
+
+## Creating dataframes
+- In lab 1 we saw how to create vectors
+- Sometimes we want to put vectors together into a dataframe, a two dimensional object
+```{r}
+x <- c(100, 95, 93, 97) # define a data vector (variable) x
+y <- c(95, 98, 86, 91) # define y
+dat <- data.frame(x, y) # create a data frame, cols are variables
+## You can see dat in your Workspace now
+dat
+```
+
+## Working directory
+- If you launch your R editor with the R file you are going to use and the data that you will use is in that same directory, then R will treat that folder as your working directory.
+- Check your working directory and change if needed
+```{r}
+getwd()
+```
+```{r eval = FALSE}
+# see lab 1 for examples on setwd()
+setwd()
+```
+
+## Reading data into R
+- There are many ways to read data into R
+- We will use read.table() or variations on that function in labs
+- All code will assume data is in the same folder as our R file
+```{r}
+# Check out ?read.table
+mydata1 <- read.table(file = "job1.txt")
+```
+
+## Reading a comma-delimited file
+- Instead of read.table(), we will use read.csv()
+- Note the column names that we get by setting header = TRUE
+```{r}
+mydata <- read.csv(file = "job.csv", header = TRUE)
+head(mydata)
+```
+
+## Referencing specific entries or rows
+```{r}
+mydata[1, 2]  # the entry at row 1 and column 2
+mydata[1:10, ] # the first ten rows (all columns)
+```
+
+## See two columns
+```{r}
+mydata[ , 4:5] # the 4th and 5th columns
+```
+
+## See specific set of rows and columns
+```{r}
+mydata[c(2, 3, 5), 1:3] # rows 2, 3, and 5 of columns 1-3
+```
+
+## See all data except for some rows
+```{r}
+mydata[-1:-400, ] # all data except for the first 400 rows
+```
+
+## Refer to columns by name
+```{r}
+mydata["1" , "AGE"]
+mydata[1:20, c("IQ", "AGE", "WBEING", "SATIS")]
+```
+
+## Look at a subset based on a factor variable
+```{r}
+mydata[mydata$FEMALE == 0, ]  # select data for males
+```
+
+## Look at a subset based on a continuous value
+```{r}
+mydata[mydata$AGE > 50, ]
+```
+
+## Reference the IQ column
+```{r}
+mydata$IQ
+```
+
+## Size of data set and basic statistics
+```{r}
+dim(mydata) # returns dimensions of a data frame
+summary(mydata) # a summary of each variable
+```
+
+## Look at a summary of 4 columns
+```{r}
+dim(mydata[ , c("IQ", "AGE", "WBEING", "SATIS")])
+summary(mydata[ , c("IQ", "AGE", "WBEING", "SATIS")])
+```
+
+## Frequency tables
+```{r}
+table(mydata$FEMALE, mydata$JOBPERF)
+```
+
+## Covariance and correlation
+```{r}
+cov(mydata$AGE, mydata$JOBPERF)
+cor(mydata$AGE, mydata$JOBPERF)
+```
+
+## Functions for vectors applied to a dataframe
+- All the one-dimensional descriptive functions apply here if we reference one column
+```{r}
+mean(mydata$IQ)
+sd(mydata$IQ)
+range(mydata$IQ)
+```
+
+## Create variable and add to dataframe
+- We can create a new variable in the data frame by directly assigning values to it.
+```{r}
+mydata$IQ.centered <- mydata$IQ - mean(mydata$IQ)
+summary(mydata)
+```
+
+## Factor variables in R
+When reading in data using data.frame() or read.table()/ read.csv(), R guesses the types of variables. By default, numeric variables will still be numeric, while character data and logical data will be the translated into factors (categorical variables).
+
+But sometimes we need to tell R specifically that some of the numeric variables are actually factors. 
+
+The factor() function converts a numeric variable into a factor. The labels= argument specifies labels for the factor levels. 
+
+## Telling R about a factor
+- Create a new variable
+- Look at the levels
+```{r}
+mydata$FEMALE.f <- factor(mydata$FEMALE)
+levels(mydata$FEMALE.f) # look at the catagories (aka levels)
+```
+
+## Add and change level information
+- We can associate labels to numbers in our factor
+- Labels need to be assigned in order that R sees the levels (alpha-numeric)
+- Note that in the data male = 0 and female = 1
+```{r}
+mydata$FEMALE.f <- factor(mydata$FEMALE, labels=c("Male", "Female"))
+levels(mydata$FEMALE.f)
+mydata$TURNOVER.f <- factor(mydata$TURNOVER, labels=c("No", "Yes"))
+levels(mydata$TURNOVER.f)
+```
+
+## Look at the new summary
+```{r}
+summary(mydata[ , c("FEMALE", "FEMALE.f", "TURNOVER", "TURNOVER.f")])
+```
+
+## Tired of typing mydata$ in front of your variable?
+- For functions that don't have 'data =' as an option, use with() instead
+```{r}
+# Equal to table(mydata$FEMALE, mydata$JOBPERF)
+with(mydata, table(FEMALE, JOBPERF))
+# Another example
+with(mydata, cov(IQ, JOBPERF))
+```
+
+## Plots
+- Scatterplot
+- Boxplot
+- Crosstabs
+- Bar plots
+
+## Basic scatterplot
+```{r}
+plot(JOBPERF ~ IQ, data = mydata)
+```
+
+## Matrix of scatterplots
+- Use all rows of cols 2, 3, 4
+```{r}
+pairs(mydata[, c(2, 3, 4)]) 
+```
+
+## Create new dataframes separated by gender
+```{r}
+mydata_m <- mydata[mydata$FEMALE==0, ]  # copy rows where FEMALE==0
+mydata_f <- mydata[mydata$FEMALE==1, ]  # copy rows where FEMALE==1
+```
+
+## Redraw scatterplot frame and then add points for males
+```{r}
+plot(JOBPERF ~ IQ, data = mydata, xlab="IQ", ylab="Job Performance", 
+     type="n")
+points(JOBPERF ~ IQ, data = mydata_m, col="black", 
+       pch=1) #  col= sets the color
+```
+
+## Syntax to add points for female and legend
+```{r eval = FALSE}
+plot(JOBPERF ~ IQ, data = mydata, xlab="IQ", ylab="Job Performance", 
+     type="n")
+points(JOBPERF ~ IQ, data = mydata_m, col="black", 
+       pch=1) #  col= sets the color
+points(JOBPERF ~ IQ, data = mydata_f, col="grey80", 
+       pch=4)  # pch= sets the shape
+legend("topleft", legend=c("Male","Female"), col=c("black","grey80"), 
+       pch=c(1,4))
+```
+
+## Syntax to add points for female and legend
+```{r echo = FALSE}
+plot(JOBPERF ~ IQ, data = mydata, xlab="IQ", ylab="Job Performance", type="n")
+points(JOBPERF ~ IQ, data = mydata_m, col="black", pch=1) #  col= sets the color
+points(JOBPERF ~ IQ, data = mydata_f, col="grey80", pch=4)  # pch= sets the shape
+legend("topleft", legend=c("Male","Female"), col=c("black","grey80"), pch=c(1,4))
+```
+
+## Boxplot of data with outliers
+```{r}
+boxplot(mydata$IQ)
+```
+
+## And another boxplot
+```{r}
+boxplot(mydata$JOBPERF)
+```
+
+## Boxplot of a subgroup with labels
+```{r eval = FALSE}
+boxplot(mydata$JOBPERF ~ mydata$FEMALE.f)  # accepts an equation
+boxplot(mydata$JOBPERF ~ mydata$FEMALE.f, ylab="Job Performance", 
+        xlab="Gender", names=c("Male","Female"))  #  Add labels 
+
+# Equivalent to first plot above but cleaner to read
+boxplot(JOBPERF ~ FEMALE.f, data=mydata)
+
+# Commented out in lab code but try running it!
+```
+
+## Cross-Tabulation
+```{r eval = FALSE}
+# Run this line if you need to install the package
+install.packages("descr")
+```
+```{r}
+library(descr)
+myTable1 <- with(mydata, CrossTable(FEMALE.f, TURNOVER.f))
+```
+
+## Chi-Square output
+```{r}
+myTable1
+```
+
+## Contingency table function
+```{r eval = FALSE}
+# Run this line if you need to install the package
+install.packages("memisc")
+```
+```{r}
+library(memisc)
+```
+
+## Contingency table with counts and percents
+```{r}
+myTable2 <- with(mydata, genTable(TURNOVER.f ~ FEMALE.f))
+myTable2
+myTable3 <- with(mydata, genTable(percent(TURNOVER.f) ~ FEMALE.f))
+myTable3
+```
+
+## Barplot
+- A bar plot is a graphic presentation of a cross tabulation table.
+```{r eval = FALSE}
+barplot(myTable3[1:2,], beside=T, names=c("Men","Women"), 
+        col=c("blue","red"), density=c(90,40), angle=c(45,-45),
+        ylab="Turnover", xlab="Gender")
+legend("topright", legend = levels(mydata$TURNOVER.f), 
+       fill=c("blue","red"), density=c(90,40), angle = c(45,-45),
+       cex=1.2)
+
+# Note that barplot() uses "col=" but legend() uses "fill="
+```
+
+## Barplot
+- A bar plot is a graphic presentation of a cross tabulation table.
+```{r echo = FALSE}
+barplot(myTable3[1:2,], beside=T, names=c("Men","Women"), 
+        col=c("blue","red"), density=c(90,40), angle=c(45,-45),
+        ylab="Turnover", xlab="Gender")
+legend("topright", legend = levels(mydata$TURNOVER.f), 
+       fill=c("blue","red"), density=c(90,40), angle = c(45,-45),
+       cex=1.2)
+```
+
+
+
+## Exporting data
+- Like read.table or read.csv there are corresponding write functions
+- Double check your working directory using these functions
+```{r eval = FALSE}
+write.table(mydata, file="out.txt", sep="\t", row.names=FALSE, 
+            quote = FALSE)
+write.csv(mydata, file="out.csv", row.names=FALSE, quote = FALSE)
+```
+- 'sep =' is used to denote how columns should be separated
+- tab is used above; comma ',' and space ' ' are also common
