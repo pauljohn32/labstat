@@ -1,4 +1,5 @@
 ## ----eval = FALSE--------------------------------------------------------
+## options(width = 55)
 ## install.packages("UsingR") # install UsingR package
 
 ## ------------------------------------------------------------------------
@@ -111,17 +112,17 @@ with(mydata, table(FEMALE, JOBPERF))
 # Another example
 with(mydata, cov(IQ, JOBPERF))
 
-## ------------------------------------------------------------------------
+## ----fig.align='center'--------------------------------------------------
 plot(JOBPERF ~ IQ, data = mydata)
 
-## ------------------------------------------------------------------------
+## ----fig.align='center'--------------------------------------------------
 pairs(mydata[, c(2, 3, 4)]) 
 
-## ------------------------------------------------------------------------
+## ----fig.align='center'--------------------------------------------------
 mydata_m <- mydata[mydata$FEMALE==0, ]  # copy rows where FEMALE==0
 mydata_f <- mydata[mydata$FEMALE==1, ]  # copy rows where FEMALE==1
 
-## ------------------------------------------------------------------------
+## ----fig.align='center'--------------------------------------------------
 plot(JOBPERF ~ IQ, data = mydata, xlab="IQ", ylab="Job Performance", 
      type="n")
 points(JOBPERF ~ IQ, data = mydata_m, col="black", 
@@ -137,16 +138,16 @@ points(JOBPERF ~ IQ, data = mydata_m, col="black",
 ## legend("topleft", legend=c("Male","Female"), col=c("black","grey80"),
 ##        pch=c(1,4))
 
-## ----echo = FALSE--------------------------------------------------------
+## ----echo = FALSE, fig.align='center'------------------------------------
 plot(JOBPERF ~ IQ, data = mydata, xlab="IQ", ylab="Job Performance", type="n")
 points(JOBPERF ~ IQ, data = mydata_m, col="black", pch=1) #  col= sets the color
 points(JOBPERF ~ IQ, data = mydata_f, col="grey80", pch=4)  # pch= sets the shape
 legend("topleft", legend=c("Male","Female"), col=c("black","grey80"), pch=c(1,4))
 
-## ------------------------------------------------------------------------
+## ----fig.align='center'--------------------------------------------------
 boxplot(mydata$IQ)
 
-## ------------------------------------------------------------------------
+## ----fig.align='center'--------------------------------------------------
 boxplot(mydata$JOBPERF)
 
 ## ----eval = FALSE--------------------------------------------------------
@@ -158,17 +159,6 @@ boxplot(mydata$JOBPERF)
 ## boxplot(JOBPERF ~ FEMALE.f, data=mydata)
 ## 
 ## # Commented out in lab code but try running it!
-
-## ----eval = FALSE--------------------------------------------------------
-## # Run this line if you need to install the package
-## install.packages("descr")
-
-## ------------------------------------------------------------------------
-library(descr)
-myTable1 <- with(mydata, CrossTable(FEMALE.f, TURNOVER.f))
-
-## ------------------------------------------------------------------------
-myTable1
 
 ## ----eval = FALSE--------------------------------------------------------
 ## # Run this line if you need to install the package
@@ -193,7 +183,7 @@ myTable3
 ## 
 ## # Note that barplot() uses "col=" but legend() uses "fill="
 
-## ----echo = FALSE--------------------------------------------------------
+## ----echo = FALSE, fig.align='center'------------------------------------
 barplot(myTable3[1:2,], beside=T, names=c("Men","Women"), 
         col=c("blue","red"), density=c(90,40), angle=c(45,-45),
         ylab="Turnover", xlab="Gender")
