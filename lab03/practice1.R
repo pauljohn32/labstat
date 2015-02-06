@@ -96,7 +96,7 @@ for(i in 1:50){
     write.dta(dat, file = paste("student-Ex1/student-",i,".dta", sep=""))
 
 
-    teacher[[i]] <-  list(mymvn, rockchalk::summarize(dat), cor=cor(dat[, 1:5]), type=disttype, mysamp)
+    teacher[[i]] <-  list(mymvn, rockchalk::summarize(dat), cor=cor(dat[, 1:5]), type = disttype)
 
     mx1 <- mean(dat$x1)
     my1 <- mean(dat$y1)
@@ -107,7 +107,7 @@ for(i in 1:50){
     legend("topleft",legend=c(paste("mean(x1)=", round(mx1,3)), paste("mean(y1)=",round(my1,3))), bg="white")
     legend("topright",legend=c(paste("sd(x1)=", round(sd(dat$x1),3)), paste("sd(y1)=",round(sd(dat$y1),3)), paste("cor=",round(cor(dat$x1,dat$y1), 3 ))), bg="white")
 
-    hist(dat$x3, prob=T, main=c(paste("Student-", i, " ", disttype, sep=""), paste(unlist(mysamp),  sep="")))
+    hist(dat$x3, prob=T, main = c(paste("Student-", i, " ", disttype, sep="")))
 }
 
 dev.off()

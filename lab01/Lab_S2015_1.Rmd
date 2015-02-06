@@ -2,7 +2,7 @@
 title: "Getting Started With R"
 author: "P. Johnson, B. Rogers, and L. Shaw"
 date: "Wednesday, January 28, 2015"
-output: ioslides_presentation
+output: slidy_presentation
 ---
 
 ## Getting comfortable with R
@@ -228,7 +228,7 @@ hist(mydata, prob=TRUE, xlab="X-Variable Name",
 ```
 
 ## Add a density line
-```{r}
+```{r tidy=TRUE}
 hist(mydata, prob=TRUE, xlab="X-Variable Name", 
      ylab="Proportion of Cases", breaks=50) 
 lines(density(mydata))
@@ -263,8 +263,9 @@ h1 <- hist(mydata, prob=TRUE, xlab="X-Variable", ylab="Density",
            main="My First Histogram", breaks=10) 
 ```
 
-## Information stored in histograms
+## Information stored in histograms {.allowframebreaks}
 ```{r}
+options(width=55)
 h1
 ```
 
