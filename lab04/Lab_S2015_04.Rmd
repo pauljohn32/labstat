@@ -1,0 +1,255 @@
+---
+title: "Multiple Regression With 1 Predictor"
+author: "P. Johnson, B. Rogers, L. Shaw"
+date: "Wednesday, February 18, 2015"
+output:   
+  slidy_presentation:
+    fig_width: 6
+    fig_height: 5
+---
+
+## Simple regression
+- Regression with one continuous predictor
+- Predicted values and residuals
+- Plotting regression lines
+- Confidence intervals
+- Regression with one dichotomous predictor
+- Meaningful plots
+
+## Simple regression
+
+- Regression with a single predictor is sometimes referred to as simple regression.
+- We can use the lm function (linear model) to obtain the regression coefficients.
+    + The first piece of information that lm expects is the regression relationship you are specifying
+    + 'outcome ~ predictor' is the basic form
+    + we will use 'data = to' specify the dataset
+  
+## Read in data and look at it
+```{r echo =FALSE}
+options(width = 75)
+```
+```{r}
+# Read in data
+lab4 <- read.table("salary_subset.txt", header=TRUE)
+library(rockchalk)
+summarize(lab4)
+```
+- Do you think salary is normally distributed?
+
+## Run a simple regression
+- salary is our DV, pub is our IV
+```{r}
+# outcome (dependent variable) regressed on predictor (independent variable)
+lm(salary ~ pub, data= lab4)
+```
+- What do those numbers refer to?
+- How do you interpret them?
+
+## Run a simple regression
+- salary is our DV, pub is our IV
+```{r}
+# outcome (dependent variable) regressed on predictor (independent variable)
+lm(salary ~ pub, data= lab4)
+```
+- What do those numbers refer to?
+- How do you interpret them?
+    + The average salary for someone with 0 publications is $47,940.
+    + For every publication, expected salary should go up by $1,148.
+    
+## Run a simple regression
+- salary is our DV, pub is our IV
+```{r}
+# outcome (dependent variable) regressed on predictor (independent variable)
+lm(salary ~ pub, data= lab4)
+```
+- lm() provides little output unless we store the results
+```{r}
+mod1 <- lm(salary ~ pub, data= lab4)
+```
+
+## Explore the results
+- Summary on a data frame provides descriptive statistics.
+- Using summary on lm() gives us summary stats about parameter estimates, standard errors, significance tests for the parameter estimates, the residuals (the deviations of the data from the regression line), and model fit information.
+```{r}
+summary(mod1)
+```
+
+## And more
+- The anova function can be used to see details on the model F statistic.
+- This is more useful with model comparison as we will see with multiple predictors.
+```{r}
+anova(mod1)
+```
+- To see a complete list of what is available in our saved model:
+```{r}
+names(mod1)
+```
+
+## Relationship between intercept and slope
+- We can also generate a covariance matrix between the estimated intercept and slope parameters by using the vcov() function.
+```{r}
+vcov(mod1)
+```
+
+## Confidence intervals
+- Since our estimates have some amount of error to them, it is often useful to think of our parameters as covering a range of possibilities, rather than staying at a single point.
+```{r}
+confint(mod1)
+```
+- The default interval is 95% but you can change this.
+```{r}
+confint(mod1, level = 0.99)
+```
+
+## Predicted values
+- With the results we can 'predict' salaries based on how many publications a person  has.
+```{r}
+predict(mod1)
+```
+
+## Predicted values with fitted
+- Or use this function instead.
+```{r}
+fitted(mod1)
+```
+
+## Predicted salary and actual salary are usually different
+- Residuals = predicted values - observed values for the dependent variable.
+```{r}
+resid(mod1)
+```
+
+## Fitting a regression line to scatterplot
+- Useful fact: the standardized slope coefficient = correlation
+```{r fig.align='center'}
+cor(lab4$salary, lab4$pub)
+# Now make a scatterplot and add a line based on our model
+plot(salary ~ pub, data= lab4) 
+abline(mod1)
+```
+
+## Identical result with explicit values
+```{r fig.align='center'}
+plot(salary ~ pub, data= lab4) 
+abline(47940.4, 1148.2)  # abline(intercept, slope)
+```
+
+## Adding CI to predicted values - Option 1
+- We want to see the 95% CI above and below our predicted value.
+- Intercept is partialed out from predicted values.
+```{r fig.align='center'}
+termplot(mod1, se=TRUE, partial.resid=TRUE)
+```
+
+## Adding confidence bands of your own - Option 2
+```{r}
+# Find the range of our predictor
+range(lab4$pub)
+# Use the range to create a 1 column data.frame covering that range
+regData <- data.frame("pub" = seq(1, 40)) 
+# Create a new data.frame storing predicted values
+regData.pred <- predict(mod1, newdata = regData, interval = "conf")
+# Bind those two data.frames together
+regData <- cbind(regData, regData.pred)
+```
+
+## Plot your results
+```{r fig.align='center'}
+plot(salary ~ pub, data= lab4)
+lines(fit ~ pub, data=regData)                    #plot the predicted values
+lines(lwr ~ pub, data=regData, lty=3, col="red")  #plot the lower boundary
+lines(upr ~ pub, data=regData, lty=4, col="red")  #plot the upper boundary
+legend("topleft", legend=c("predicted", "conf-lower", "conf-upper"),
+       lty=c(1,3,4), col=c("black","red","red"))
+```
+
+## Another way to plot your own confidence bands
+- Reuse the code to create your own data.frames but do not combine into one data.frame
+```{r fig.align='center'}
+range(lab4$pub)
+regData <- data.frame("pub" = seq(1, 40)) 
+regData.pred <- predict(mod1, newdata = regData, interval = "conf")
+matplot(x = regData, y = regData.pred , type = "l")
+points(salary ~ pub, data= lab4, col = gray(.7))
+```
+
+## Simple regression with a dichotomous predictor
+- Can gender predict professors' salary?
+- First, take a look at your data again.
+```{r}
+head(lab4) # gender has two levels, 0 and 1
+lab4$gender <- factor(lab4$gender) # turn gender into a factor
+levels(lab4$gender) # look at the levels
+lab4$gender <- factor(lab4$gender, label=c("male", "female")) # assign labels
+summary(lab4) # check your work
+```
+
+## Run the model and store the output
+```{r}
+mod2 <- lm(salary ~ gender, data= lab4) 
+contrasts(lab4$gender)
+```
+- In our data, gender can take on two values: male or female.
+- Contrast tells us how to interpret the output. 
+- The value with 0 is called our reference group.
+- In our first model, the interpretation of the intercept was the average salary when our predictor (pub) was 0.
+- Following that logic, the intercept is the average salary when gender is 0 (male).
+- The coefficient for gender is the difference between males and females.
+
+## Look at model results
+- All of the same functions we looked at for the first example apply: anova(), vcov(), confint(), predict(), fitted(), resid()
+```{r}
+summary(mod2)
+```
+
+## Plotting the regression
+- An improper way to plot the results is shown here.
+```{r fig.align='center'}
+plot(salary ~ gender, data = lab4)
+abline(mod2)
+```
+
+- Plot is treating our regression coefficient as a slope, but with dichotomous data it is a mean difference.
+
+## A better plot
+```{r fig.align='center'}
+termplot(mod2, se = T, partial.resid =T)
+```
+
+## A better plot with a new label on Y
+```{r fig.align='center'}
+termplot(mod2, se = T, partial.resid =T, ylab = "salary")
+```
+
+## Draw your own confidence bands
+```{r fig.align='center'}
+plot(salary ~ gender, data = lab4)
+regData <- data.frame("gender" = levels(lab4$gender))
+regData.pred <- predict(mod2, newdata = regData, interval = "conf")
+regData <- cbind(regData, regData.pred)
+```
+
+## Draw predicted values and upper and lower bands
+```{r eval = FALSE}
+plot(salary ~ gender, data = lab4)
+# Predicted values
+lines( x=c(0.75, 1.25), y = c(regData$fit[1], regData$fit[1]), col="green", lwd=2)
+lines( x=c(1.75, 2.25), y = c(regData$fit[2], regData$fit[2]), col="green", lwd=2)
+# Upper values
+lines( x=c(0.85, 1.15), y = c(regData$upr[1], regData$upr[1]), col="red", lwd=2)
+lines( x=c(1.85, 2.15), y = c(regData$upr[2], regData$upr[2]), col="red", lwd=2)
+# Lower values
+lines( x=c(0.85, 1.15), y = c(regData$lwr[1], regData$lwr[1]), col="red", lwd=2)
+lines( x=c(1.85, 2.15), y = c(regData$lwr[2], regData$lwr[2]), col="red", lwd=2)
+```
+
+## Final boxplots
+```{r echo = FALSE, fig.align='center'}
+plot(salary ~ gender, data = lab4)
+lines( x=c(0.75, 1.25), y = c(regData$fit[1], regData$fit[1]), col="green", lwd=2)
+lines( x=c(1.75, 2.25), y = c(regData$fit[2], regData$fit[2]), col="green", lwd=2)
+lines( x=c(0.85, 1.15), y = c(regData$upr[1], regData$upr[1]), col="red", lwd=2)
+lines( x=c(1.85, 2.15), y = c(regData$upr[2], regData$upr[2]), col="red", lwd=2)
+lines( x=c(0.85, 1.15), y = c(regData$lwr[1], regData$lwr[1]), col="red", lwd=2)
+lines( x=c(1.85, 2.15), y = c(regData$lwr[2], regData$lwr[2]), col="red", lwd=2)
+```
