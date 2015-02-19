@@ -22,7 +22,6 @@ Variable names:
 
 ## Get Data, put in same directory as this file
 
-###### 5.1 Data diagnostics ######
 lab5 <- read.table("publicspending.txt", header = TRUE)
 
 ## First, we want to check the names of all of our variables
