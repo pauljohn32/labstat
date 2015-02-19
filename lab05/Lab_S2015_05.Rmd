@@ -1,5 +1,5 @@
 ---
-title: "Lab 5: Multiple Regression"
+title: "Lab 5: Regression"
 author: "P. Johnson, B. Rogers, L. Shaw"
 date: "Wednesday, February 25, 2015"
 output:   
@@ -83,6 +83,16 @@ plots by only looking at a subset of the items
 plot(lab5[ , 1:3])
 ```
 
+
+summary(meanCenter(mod1))
+
+## Compare against manually center.
+```{r}
+lab5$ecabmc <- lab5$ecab - mean(lab5$ecab, na.rm = TRUE)
+attributes(lab5$ecabmc2)
+lab5$ecabmc2 <- scale(lab5$ecab, center = 20,  scale = FALSE)
+plot(ecabmc ~ ecab, lab5)
+```
 
 ## 5.2.1 Multiple regression model
 - Step 1: Run regression
