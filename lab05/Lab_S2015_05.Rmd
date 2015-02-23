@@ -5,13 +5,17 @@ date: "Wednesday, February 25, 2015"
 output:   
   slidy_presentation:
     fig_width: 6
-    fig_height: 5
+    fig_height: 4
 ---
 
-
+## Elementary (simple) regression part 2
+- Pulling data from the internet
+- Example
+- Interpretation
+- Mean centering
+- Pleasing plots
 
 ## Let's take a look at the publicspending.txt data.
-Variable names:
 - EX: Per capita state and local public expenditures ($)	
 - ECAB: Economic ability index, in which income, retail sales,  and the value of output (manufactures, mineral, and agricultural) per capita are equally weighted.	
 - MET: Percentage of population living in standard metropolitan areas	
@@ -19,9 +23,11 @@ Variable names:
 - YOUNG: Percent of population aged 5-19 years	
 - OLD: Percent of population over 65 years of age	
 - WEST: Western state (1) or not (0) 
+- STATE: Abbreviation of state
 
-## Get Data, put in same directory as this file {.allowframebreaks}
+## Get Data, put in same directory as this file
 ```{r}
+getwd()
 if (!file.exists("publicspending.txt")){
     lab5.url <- "http://pj.freefaculty.org/guides/stat/DataSets/PublicSpending/publicspending.txt"
     download.file(lab5.url, destfile = "publicspending.txt")
@@ -29,193 +35,215 @@ if (!file.exists("publicspending.txt")){
 lab5 <- read.table("publicspending.txt", header = TRUE)
 ```
 
-```{r, echo=FALSE}
+- We first check to see if 'publicspending.txt' is in our working directory
+- If publicspending is not found (!fileexists), run the two line between { and }
+    + assign internet url to a variable
+    + download the file to working directory and call it publicspending.txt
+- Read data file from working directory
+```{r echo = FALSE}
+options(width = 75)
 library(rockchalk)
 ```
 
+## Look at our data
 - First, we want to check the names of all of our variables
 ```{r}
 head(lab5)
 ```
 
 ## Oops, that capitalization problem
-
+- Last week, the data set on Blackboard had variables in UPPER CASE.
+- You can convert them all to lower case with a single command for simpler typing.
 ```{r}
 colnames(lab5) <- tolower(colnames(lab5))
+names(lab5)
 ```
 
-## Look Over the Data {.allowframebreaks}
- - Then we can get descriptive stats for all of our variables
-```{r}
-summary(lab5)
-```
-
+## Look over the data
 ```{r}
 summarize(lab5)
 ````
 
-- We can also get a covariance matrix and correlation matrix
- #of all of the variables in our dataset.
-
-```
+## Request covariance matrix of whole data set
+- We can also get a covariance matrix and correlation matrix of all of the variables in our dataset.
+```{r eval = FALSE}
 cov(lab5)
-```
-Get your error message!
-```
+
 > cov(lab5)
 Error: is.numeric(x) || is.logical(x) is not TRUE
 ```
 
 ```{r cov}
-options(width = 70)
-cov(lab5[ , 1:6])
-
 cov(lab5[ , 1:6])
 ```
+
+## And the correlation matrix
+- We are not including our dichotomous variable, west
 ```{r cor2}
 cor(lab5[ , 1:6])
 ```
-- Finally, we can plot the bivariate relationships in our data
-plot(lab5)
-- To actually see the graphs, we may want to reduce the number of
-plots by only looking at a subset of the items 
-```{r myplot, fig.align="center"}
-plot(lab5[ , 1:3])
+
+## Plot matrix of bivariate relationships
+- We are not plotting our dichotomous variable, west
+```{r fig.align="center"}
+plot(lab5[ , 1:6])
 ```
 
-
-summary(meanCenter(mod1))
-
-## Compare against manually center.
+## Elementary regression example
+- public expenditures regressed on economic capabilities
+ - Step 1. Run the regression.
 ```{r}
-lab5$ecabmc <- lab5$ecab - mean(lab5$ecab, na.rm = TRUE)
-attributes(lab5$ecabmc2)
-lab5$ecabmc2 <- scale(lab5$ecab, center = 20,  scale = FALSE)
-plot(ecabmc ~ ecab, lab5)
-```
-
-## 5.2.1 Multiple regression model
-- Step 1: Run regression
-```{r reg1}
 mod1 <-lm(ex ~ ecab, data = lab5)
-
 ```
-- Step 2. Interrogate that object
+- Step 2. Look at model summary.
 ```{r}
 summary(mod1)
 ```
 
+## Look at vcov
 ```{r}
 vcov(mod1)
 ```
 
+- You can use vcov info to compute model standard errors.
 ```{r}
 sqrt(diag(vcov(mod1)))
 ```
 
-
-
-
+## Model interpretation
+- The average public expenditure (ex) is 118.98 when there is 0 economic capabilities (ecab).
+- Does this interpretation make sense?
+- What is public expenditure for average economic capabilities?
 ```{r}
-mod2 <-lm(ex ~ ecab + grow + young, data = lab5)
-anova(mod2)
-
-anova(mod2, mod1)
-
-anova(mod2, test = "Chisq")
-
-
-predict(mod1, newdata = data.frame(ecab = c(10, 20, 30)), interval = c("confidence"))
-
-
+mean(lab5$ecab)
+# b0 + b1ecab_at_mean
+118.9832 + 1.7329*96.75417
 ```
 
+## Put centered predictor into regression
+- We are centering at the mean, but we can choose any other value that would aid interpretation.
+    + If we were studying students in grades 1-5, an intercept when grade is 0 makes little sense.
+    + We could recenter on the average grade, 3, so the intercept would be the average for 3rd graders (grade - mean(grade)).
+    + We could 'recenter' grade so that intercept would be the average in grade 1 (grade - 1).
+- We could also put the variable on standard, normal scale with mean = 0 and variance = 1.
+    + This is based on the z-scale.
+    + The regression coefficient is a standardized coefficient.
+    
+## Use scale to 'recenter'
+- First list the variable you want to change.
+- If you enter nothing else in the function, the variable will be standardized with mean = 0, variance = 1.
+- Setting 'scale = FALSE' will not divide the term by its variance.
+- If you want to center by something other than the mean, change 'center = ' to your number.
+```{r}
+lab5$ecabmc <- scale(lab5$ecab,  center = TRUE, scale = FALSE)
+```
 
+## Check your work
+- If rescaling worked, the original and rescaled variable will be perfectly correlated.
+```{r fig.align="center"}
+cor(lab5$ecab, lab5$ecabmc)
+plot(ecabmc ~ ecab, lab5) # check your work
+```
 
-## Let's look at a summary object.
-- Name the summary(mod1) as m1sum and take a look at what are inside.
-m1sum <- summary(mod1)
-names(m1sum)
-m1sum$coef  # returns the t table. Same as m1sum$coefficients
+## Re-run the model with ecabmc
+```{r}
+mod2 <-lm(ex ~ ecabmc, data = lab5)
+anova(mod2)
+anova(mod2, mod1) # compare new with original
+```
 
-m1sum$resid  # returns the residuals
-m1sum$r.squared # returns the R^2
+## Look at the mean centered model summary
+- Recall from our manual calculation of our intercept at the mean of economic capability was 286.6485.
+```{r}
+summary(mod2)
+```
 
-## 5.2.2 Plot the regression
+## Fast mean centering - rockchalk
+```{r echo = FALSE}
+options(width = 70)
+```
+```{r}
+summary(meanCenter(mod1))
+```
 
-<!-- ###### (1) termplot() -->
-<!-- ## The termplot() function can be used to plot the predicted Y against -->
-<!-- ## its Xs. When having multiple predictors, termplot() will  -->
-<!-- ## generate one plot for each predictor.  -->
-<!-- ## We can use the par(mfrow=..) function to combine multiple simple plots -->
-<!-- ## as panels in a single figure. -->
-<!-- par(mfrow = c(2, 2)) -->
-<!-- termplot(mod1, se = TRUE, partial.resid = TRUE) -->
-<!-- par(mfrow = c(1,1)) # change back to the original layout  -->
+## Pretty plots
+- While default values for plot size are fine when getting a feel for your data, but what are some good practices when you need to create a publication ready figure?
+- What type of plot should you use?
+- What labels should you choose?
+- How should you size the figure?
+- Different R options
+- Fonts and colors
+- Saving to PDF
 
-<!-- ## Choose which predictor to plot -->
-<!-- termplot(mod1,  se = TRUE, partial.resid = TRUE, terms= "ECAB") -->
-<!-- #  You can save that to a file, like a pdf -->
-<!-- dev.print(pdf, file = "mod1.ecab.pdf", onefile = FALSE, paper = "special") -->
+## What type of plot should you use?
+![title](Lumley-PieChartsBad-1.png)
 
+## What type of plot should you use?
+- Pie charts are never a good choice.
+- Bar plots for categorical data and histograms are better ways to present frequency though tables are probably a better choice for descriptive statistics.
+- Scatterplots are useful to illustrate how two variables are changing (or not changing) together or to highlight a non-linear relationship that has been previously hypothesized as linear.
+- In a journal article, you will probably be limited on the number of figures you can submit with the article. Do you want to waste one on descriptive information?
+- What type of figures do other people use in articles similar to the one you are writing?
+- How is the picture going to help the reader understand the story you are telling?
 
-<!-- ### Spawning useful input values for predict -->
-<!-- #   More useful than just creating a sequence of integers across range -->
-<!-- #   predictOMatic() gives you the quartile values for a variable, paired with -->
-<!-- #   the mean of the other variables -->
-<!-- library(rockchalk) -->
-<!-- predictOMatic(mod1) -->
-<!-- summarize(lab5$GROW)  # Compare the values with predictOMatic output -->
-<!-- predictOMatic(mod1, interval = "confidence")  # same, but wait, there's more! -->
-<!-- predictOMatic(mod1, predVals = "auto", intervals = "confidence") # makes single set -->
+## What labels should you choose?
+- By default, R provides no title and the variable names as the labels or other predefined values.
+```{r fig.align="center"}
+plot(ex ~ ecab, data = lab5)
+```
 
-<!-- ## You can do sort of the same thing with newdata() and predict() -->
-<!-- new1 <- newdata(mod1, predVals="auto", divider="quantile") # quantile is default -->
-<!-- new1 -->
-<!-- predict(mod1, newdata = new1) -->
-<!-- ## And using standard deviations instead of quartiles... -->
-<!-- (new1 <- newdata(mod1, predVals="auto", divider="std.dev.")) -->
-<!-- predict(mod1, newdata = new1) -->
-<!-- ## Get more values  -->
-<!-- (new2 <- newdata(mod1, predVals = "margins", n = 10)) -->
+## Labels
+- Use xlab and ylab to change your axis labels to something that does not require knowledge of your data set to understand.
+- Should you include a title within the plot itself? It depends on the publishing guidelines you are following. APA guidelines instructs you to crop any titles out so that the title is in the text of the document.
+- If the plot is for a poster or other presentation, you might want to include a title.
 
+## And a legend
+- Legends can be placed inside a plot or in the margins with inset
+```{r fig.align="center"}
+plot(ex ~ ecab, xlab = "Economic capability", ylab = "Per capita public expenditure", 
+     main = "Expenditure Predicted by Economic Capability", type = "n", data = lab5)
+points(lab5[lab5$west == 0, "ecab"], lab5[lab5$west == 0, "ex"], pch = 0)
+points(lab5[lab5$west != 0, "ecab"], lab5[lab5$west != 0, "ex"], pch = 4)
+abline(mod1)
+legend("bottomright",legend=c("Eastern", "Western"), pch=c(0,4), title = "States")
+```
 
+## How should you size the figure?
+- You may have heard of aspect ratio, golden rectangle or the golden ratio.
+    + According to Edward Tufte "[g]raphics should tend toward the horizontal" (Tufte, E. R., 2001; The visual display of quantitative information, p. 186). 
+    + Tufte proposes two ratios: the golden rectangle--1/1.618 (the same used in Grecian temples)--or a simpler 1/1.5.
+    + But you might want the two axes to be a little more proportional because it makes more sense in the context of what you are trying to present.
+    + All plots in this presentation are 4 inches tall and 6 inches wide.
+- APA guidelines say to create a graphic no wider than 3.25 inches if the document will be in two columns or 6.875 inches wide if the document will be in 1 column. You may also be constrained to no wider that 6.5 inches for an 8.5 x 11 inch paper if you take into account 1 inch margins.
+- Here is an example or one and two columns: ![title](oneandtwocolumns.gif)
 
-<!-- ###### (2) rockchalk::plotPlane() -->
-<!-- ## The plotPlane() function in the rockchalk package creates a 3D plot of  -->
-<!-- ## the predicted Y against a plane formed by two Xs.  -->
-<!-- library(rockchalk) -->
-<!-- plotPlane(mod1, plotx1 = "ECAB", plotx2 = "MET") -->
+## Fonts and colors
+- The default fonts and colors might not be what you want.
+- If you are producing a figure to submit to a journal, check their guidelines on figures.
+    + Some journals will not accept figures with colors (or will send the bill to you for printing) so you will need to think about different shades of gray instead of colors.
+- Fonts need to be picked carefully as well.
+    + APA guidelines call for san serif fonts (Times New Roman has serifs and Arial is san serif); R defaults to a san serif font in its plots.
+    + The font can range from 8-12 points. Make sure it is big enough to be readable. 
+    
+## Different R options
+- RStudio will place the figure in the Plots window, sized to what is on the screen.
+- When you want to produce a higher quality graphic, set it up, view it, and then output the graphic directly to another format with size explicitly set.
+- For better viewing when creating a graphic, use Emacs + R, Notepad++, or R itself.
+    + Creating a graphic will launch a separate graphics viewer.
+    
+## Saving to PDF
+- To save a plot to an external file:
+```{r eval = FALSE}
+pdf("SampleGraph.pdf", width=7.5, height=5)
+plot(ex ~ ecab, xlab = "Economic capability", ylab = "Per capita public expenditure", 
+     main = "Expenditure Predicted by Economic Capability", type = "n", data = lab5)
+points(lab5[lab5$west == 0, "ecab"], lab5[lab5$west == 0, "ex"], pch = 0)
+points(lab5[lab5$west != 0, "ecab"], lab5[lab5$west != 0, "ex"], pch = 4)
+abline(mod1)
+legend("bottomright",legend=c("Eastern", "Western"), pch=c(0,4), title = "States")
+dev.off()
+```
 
-
-
-<!-- ###### 5.2.3 The fancy t-test -->
-<!-- mod2 <-lm(EX ~ ECAB + MET + GROW + OLD + YOUNG, data= lab5) -->
-<!-- ## I'd like to test whether the coefficient of "GROW" (b3) is significantly -->
-<!-- ## different from the coefficient of "YOUNG" (b5). -->
-<!-- m2sum <- summary(mod2) -->
-<!-- ## Remember the function from slide 48, 51 of the Multiple regression lecture? -->
-<!-- m2sum$coef  # returns a matrix of the t table. -->
-<!-- m2sum$coef[ ,1] # returns the first column of the t table, which contains the regression coefficients.  -->
-<!-- # Note that b3 is the fourth element, and b5 is the sixth element in the vector. -->
-
-<!-- # Give a name to the result of vcov(mod2). The result is a matrix.  -->
-<!-- vc <- vcov(mod2)  -->
-
-<!-- # Again, we use [,] to specify the elements in the matrix.  -->
-<!-- # For example, vc[4,6] is the element in the forth row and the six column. -->
-
-<!-- fancyt <- (m2sum$coef[4,1] - m2sum$coef[6,1])/sqrt( -->
-<!--                           vc[4,4]+vc[6,6]-2* vc[4,6]) -->
-<!-- fancyt  -->
-
-<!-- #Finally, we can get a p-value for this "fancy t-test": -->
-<!-- pt(fancyt, 42, lower.tail=FALSE) -->
-<!-- # 42 is our degrees of freedom for the t-test, obtained from summary(mod2). -->
-<!-- # Since "fancyt" is positive, we want the probability of scoring higher than it (lower.tail=FALSE); -->
-<!-- # if it were negative, we would want the probability of scoring lower than it (lower.tail=TRUE). -->
-<!-- # If the probability is less than 0.025 or greater than 0.975,  -->
-<!-- # the estimates are significantly different (given alpha = 0.05). -->
-<!-- # In this case, the effects of the two predictors are not significantly different from the other. -->
-
-
+    
+    
+    
