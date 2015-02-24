@@ -120,6 +120,28 @@ mean(lab5$ecab)
 118.9832 + 1.7329*96.75417
 ```
 
+## Get predicted values for various values of ecab {.allowframebreaks}
+```{r pom1}
+predictOMatic(mod1, predVals = c(ecab = "quantile"), n = 10, interval = "confidence")
+```
+
+- ecab ranges from minimum to maximum, with 10 deciles between
+- confidence intervals included at no extra charge
+
+## That was quantiles, if you like the m+sd approach
+```{r pom2}
+predictOMatic(mod1, predVals = c(ecab = "std.dev."), n = 5, interval = "confidence")
+```
+
+The 5 values of ecab chosen are m-2sd, m-1sd, m, m+1sd, m+2sd.
+
+##  If you demand 99% confidence
+Notice how the Confidence Interval on predictions gets wider
+```{r pom3}
+predictOMatic(mod1, predVals = c(ecab = "std.dev."), n = 5, interval = "confidence", level = 0.99)
+```
+
+
 ## Put centered predictor into regression
 - We are centering at the mean, but we can choose any other value that would aid interpretation.
     + If we were studying students in grades 1-5, an intercept when grade is 0 makes little sense.
@@ -163,39 +185,77 @@ summary(mod2)
 options(width = 70)
 ```
 ```{r}
-summary(meanCenter(mod1))
+mod2mc <- meanCenter(mod1, centerOnlyInteractors = FALSE)
+summary(mod2mc)
 ```
 
+
+## Lets see if the predicted values change!
+```{r pom4}
+predictOMatic(mod2mc, predVals = c(ecabc = "std.dev."), n = 5, interval = "confidence")
+```
+
+## Side by side:
+```{r, include=F}
+mod2out <- outreg(list("Uncentered" = mod1, "Centered 1" = mod2mc), tight = FALSE, type = "html",
+                  browser = FALSE)
+##cat(mod2out, file = "mod2out.html")
+```
+```{r, results = "asis"}
+cat(mod2out)
+```
+
+
 ## Pretty plots
-- While default values for plot size are fine when getting a feel for your data, but what are some good practices when you need to create a publication ready figure?
+- Use plots to explore and visualize for yourself
+- Make <b>pretty plots</b> to show other people!
+- Follow professional standards when creating for a publication or
+  professional presentation?
 - What type of plot should you use?
 - What labels should you choose?
 - How should you size the figure?
-- Different R options
 - Fonts and colors
-- Saving to PDF
+- Output format, scalable vector graphics (PDF, svg) or bitmap picture
+  formats (jpg, png)?
 
 ## What type of plot should you use?
 ![title](Lumley-PieChartsBad-1.png)
+- Pie charts are never a good choice.
 
 ## What type of plot should you use?
-- Pie charts are never a good choice.
-- Bar plots for categorical data and histograms are better ways to present frequency though tables are probably a better choice for descriptive statistics.
-- Scatterplots are useful to illustrate how two variables are changing (or not changing) together or to highlight a non-linear relationship that has been previously hypothesized as linear.
-- In a journal article, you will probably be limited on the number of figures you can submit with the article. Do you want to waste one on descriptive information?
-- What type of figures do other people use in articles similar to the one you are writing?
+- Bar plots for categorical data.
+- Histograms will seldom be demonstrated in on-paper publications because they
+"waste space", may be OK in electronic media.
+- Scatterplots are useful to illustrate how two variables are changing
+(or not changing) together (maybe nonlinear).
+
+## Presentation medium
+- On-paper publications will restrict use of graphics
+- Slide shows & posters welcome graphics
+- Online journals may emphasize plots
+- Check your competitors: What type of figures do publications use?
 - How is the picture going to help the reader understand the story you are telling?
 
 ## What labels should you choose?
-- By default, R provides no title and the variable names as the labels or other predefined values.
+- By default, R may provide bland or no title.
+- axis labels are literal
 ```{r fig.align="center"}
 plot(ex ~ ecab, data = lab5)
 ```
 
 ## Labels
-- Use xlab and ylab to change your axis labels to something that does not require knowledge of your data set to understand.
-- Should you include a title within the plot itself? It depends on the publishing guidelines you are following. APA guidelines instructs you to crop any titles out so that the title is in the text of the document.
-- If the plot is for a poster or other presentation, you might want to include a title.
+- Take care to make axis labels succinct, but informative
+- R: most plots accept xlab and ylab character string arguments.
+- If possible, squeeze some measurement info into the axes.
+
+## Plot Titles may be Optional for some purposes.
+- All plots need titles, of course. But some people don't generate
+  titles from the plotting software, but rather in the document
+  preparation process
+- Publishers would rather typeset titles to match document style!
+    - APA guidelines instructs you to exclude titles for figures.
+- You can add titles to posters and papers however you like, either in
+  the plotting software or in the document preparation process
 
 ## And a legend
 - Legends can be placed inside a plot or in the margins with inset
@@ -205,45 +265,109 @@ plot(ex ~ ecab, xlab = "Economic capability", ylab = "Per capita public expendit
 points(lab5[lab5$west == 0, "ecab"], lab5[lab5$west == 0, "ex"], pch = 0)
 points(lab5[lab5$west != 0, "ecab"], lab5[lab5$west != 0, "ex"], pch = 4)
 abline(mod1)
-legend("bottomright",legend=c("Eastern", "Western"), pch=c(0,4), title = "States")
+legend("bottomright",legend = c("Eastern", "Western"), pch = c(0,4), title = "States")
 ```
 
-## How should you size the figure?
-- You may have heard of aspect ratio, golden rectangle or the golden ratio.
-    + According to Edward Tufte "[g]raphics should tend toward the horizontal" (Tufte, E. R., 2001; The visual display of quantitative information, p. 186). 
-    + Tufte proposes two ratios: the golden rectangle--1/1.618 (the same used in Grecian temples)--or a simpler 1/1.5.
-    + But you might want the two axes to be a little more proportional because it makes more sense in the context of what you are trying to present.
+## How should you shape the figure?{.allowframebreaks}
+- Publishers will provide guidelines on minimum size fonts in figures
+- But often allow you some freedom to select the <b>aspect ratio</b>
+- The "golden rectangle" or the  "golden ratio" suggested by Edward Tufte.
+    + Suggests wider, shorter plots: "[g]raphics should tend toward
+      the horizontal" (<i>The Visual Display of Quantitative
+      Information</i> (2001), p. 186). 
+    + The "golden rectangle" suggests height/width ratio 1/1.618 (the
+	same used in Grecian temples)
+	+ We approximate by height/width =  1/1.5.
+    + Some flexibility allowed to avoid "crowded" graphs.
     + All plots in this presentation are 4 inches tall and 6 inches wide.
-- APA guidelines say to create a graphic no wider than 3.25 inches if the document will be in two columns or 6.875 inches wide if the document will be in 1 column. You may also be constrained to no wider that 6.5 inches for an 8.5 x 11 inch paper if you take into account 1 inch margins.
+- APA guidelines:
+	+ two column document: width maximum 3.25"
+	+ one column document: width maximum 6.875.
+	+ Caution, the 1 inch margin rule sets maximum at 6.5"
+- Key element is that after resizing, text must still be legible. 
 - Here is an example or one and two columns: ![title](oneandtwocolumns.gif)
 
 ## Fonts and colors
-- The default fonts and colors might not be what you want.
-- If you are producing a figure to submit to a journal, check their guidelines on figures.
-    + Some journals will not accept figures with colors (or will send the bill to you for printing) so you will need to think about different shades of gray instead of colors.
-- Fonts need to be picked carefully as well.
-    + APA guidelines call for san serif fonts (Times New Roman has serifs and Arial is san serif); R defaults to a san serif font in its plots.
-    + The font can range from 8-12 points. Make sure it is big enough to be readable. 
-    
-## Different R options
-- RStudio will place the figure in the Plots window, sized to what is on the screen.
-- When you want to produce a higher quality graphic, set it up, view it, and then output the graphic directly to another format with size explicitly set.
-- For better viewing when creating a graphic, use Emacs + R, Notepad++, or R itself.
-    + Creating a graphic will launch a separate graphics viewer.
-    
-## Saving to PDF
-- To save a plot to an external file:
-```{r eval = FALSE}
-pdf("SampleGraph.pdf", width=7.5, height=5)
+- Black and gray-scale plots travel better than color when paper
+  output is needed
+- Conventions and journals may have guidelines on figures.
+    + Some journals will not accept figures with colors (or will send the bill to you for printing).
+
+## Fonts need to be picked carefully as well.
+- Some people (Prof Johnson) prefer to have fonts in figures match text
+- APA guidelines call for sans serif fonts (e.g., Helvetica or Arial is sans serif).
+- The font can range from 8-12 points, but must withstand "re-scaling"
+effects.
+- Run your code to manufacture plots with the pointsize argument at 8
+  or 10, but be careful to specify height and widht correctly at same time.
+- To see what you are going to end up with, important to have a
+  graphic display that is sized accurately to match the desired
+  dimensions.
+
+## In any environment except RStudio...
+
+- Run this to open a separate graphing window with the default type
+for your computer
+```
+dev.new(width = 6, height = 4)
+```
+
+- Run the plot, you'll see what fits
+- Many options to control how large fonts will turn out.
+- This is for experimenting, not necessarily for saving.
+
+## Because RStudio does not allow dev.new()
+- RStudio fails with "dev.new()"
+- RStudio insists you use a platform specific graphic device
+	+ linux: X11(width = 6, height = 4)
+	+ Macintosh: quartz(width = 6, height = 4)
+	+ Windows: windows(width = 6, height = 4)(
+- That <i>should</i> pop up a screen device on which the next plot
+  will be shown.
+
+## Save to an external file
+- Mac and Windows graphics devices have a "Save As" feature.
+- That's not entirely reliable because the graph may not resize
+perfectly into some saved format.
+- Best approach: create a device in a file, write the graph in
+directly.
+- described in Professor Johnsons FirstR-01 slides as well as several
+of his plots lectures from the R course
+- Remember to finish off the file by running dev.off() at the end.
+
+## Example: Saving to PDF
+- To save a plot to an external file in PDF format:
+```{r}
+pdf("SampleGraph.pdf", width = 7.5, height = 5, onefile = FALSE, paper = "special")
+## Re-run all the plotting commands
 plot(ex ~ ecab, xlab = "Economic capability", ylab = "Per capita public expenditure", 
      main = "Expenditure Predicted by Economic Capability", type = "n", data = lab5)
-points(lab5[lab5$west == 0, "ecab"], lab5[lab5$west == 0, "ex"], pch = 0)
-points(lab5[lab5$west != 0, "ecab"], lab5[lab5$west != 0, "ex"], pch = 4)
+##points(lab5[lab5$west == 0, "ecab"], lab5[lab5$west == 0, "ex"], pch = 0)
+##points(lab5[lab5$west != 0, "ecab"], lab5[lab5$west != 0, "ex"], pch = 4)
+## Why previous?
+## Try this for more direct fix for same
+## points(ex ~ ecab, data = lab5[lab5$west == 0, ], pch = 0)
+## points(ex ~ ecab, data = lab5[lab5$west != 0, ], pch = 4)
+## Or this, which is what I'd actually use
+points(ex ~ ecab, data = lab5, pch = ifelse(lab5$west == 0, 0, 4))
 abline(mod1)
-legend("bottomright",legend=c("Eastern", "Western"), pch=c(0,4), title = "States")
+legend("bottomright", legend = c("Eastern", "Western"), pch = c(0,4), title = "States")
 dev.off()
 ```
 
-    
+## To save to other formats
+- Replace the first line that specifies the format of the output
+device.
+- PNG requires width and height in pixels
+```
+png("SampleGraph.png", width = 800, height = 600)
+```
+- Windows metafile:
+```
+win.metafile("SampleGraph.wmf", height = 4, width = 6)
+```
+
+- Run one of these that works for you needs, then run the plot
+  commands, then dev.off()
     
     
