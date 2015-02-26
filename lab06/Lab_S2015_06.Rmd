@@ -46,8 +46,7 @@ summarize(dat)
 ```{r recode2}
 dat$region <- factor(dat$west, levels = c(0, 1), labels = c("East", "West"))
 ```
-- factor variables are in the core emphasis of the movement behind the
-  S and R languages. It has been adopted by SAS and Stata as well.
+- factor variables are in the core emphasis of the movement behind the S and R languages. It has been adopted by SAS and Stata as well.
 
 - region has 2 values, "East" and "West".
 
@@ -82,7 +81,7 @@ $$
 ex_i = \beta_0 + \beta_1 ecab_i + \beta_2 met_i + \beta_3 grow +
 $$
 $$
-\beta_4 young_i + \beta_5 old_i + \beta_6 regionWest + e_i
+\beta_4 young_i + \beta_5 old_i + \beta_6 regionWest_i + e_i
 $$
 
 - Some of those $\beta$s might actually be 0. That's what we assume
