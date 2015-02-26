@@ -1,0 +1,367 @@
+---
+title: "Lab 6: Regression, Again"
+author: "P. Johnson, B. Rogers, L. Shaw"
+date: "Wednesday, March 4, 2015"
+output:   
+  slidy_presentation:
+    fig_width: 6
+    fig_height: 4
+---
+
+
+## Again, the publicspending.txt data.
+- EX: Per capita state and local public expenditures ($)	
+- ECAB: Economic ability index, in which income, retail sales,  and the value of output (manufactures, mineral, and agricultural) per capita are equally weighted.	
+- MET: Percentage of population living in standard metropolitan areas	
+- GROW: Percent change in population, 1950-1960
+- YOUNG: Percent of population aged 5-19 years	
+- OLD: Percent of population over 65 years of age	
+- WEST: Western state (1) or not (0) 
+- STATE: Abbreviation of state
+
+## Get Data
+```{r}
+if (!file.exists("publicspending.txt")){
+    lab5.url <- "http://pj.freefaculty.org/guides/stat/DataSets/PublicSpending/publicspending.txt"
+    download.file(lab5.url, destfile = "publicspending.txt")
+}
+dat <- read.table("publicspending.txt", header = TRUE)
+```
+- lets lower-case the variable names
+
+```{r recode}
+colnames(dat) <- tolower(colnames(dat))
+```
+
+
+## Inspect data, check for typos, etc
+
+```{r sum1}
+library(rockchalk)
+summarize(dat)
+```
+
+## Lets create a factor variable for the state's location
+
+```{r recode2}
+dat$region <- factor(dat$west, levels = c(0, 1), labels = c("East", "West"))
+```
+- factor variables are in the core emphasis of the movement behind the
+  S and R languages. It has been adopted by SAS and Stata as well.
+
+- region has 2 values, "East" and "West".
+
+- In a regression model, R will choose the second label and estimate a
+  variable "regionWest"
+
+## Labels improve output{.allowframebreaks}
+
+- tables look nicer. Which would you rather read?
+
+```{r}
+table(dat$west)
+```
+
+or
+
+```{r}
+table(dat$region)
+```	
+
+- Would you say a state's classification is better called
+  <i>region</i> or <i>west</i>?
+
+
+## How to Choose Variables? {.allowframebreaks}
+- Wish we had a Substantive Theory
+
+- Wish we had an "oracle" to tell us the right model
+
+- A model with a lot of variables:
+$$
+ex_i = \beta_0 + \beta_1 ecab_i + \beta_2 met_i + \beta_3 grow +
+$$
+$$
+\beta_4 young_i + \beta_5 old_i + \beta_6 regionWest + e_i
+$$
+
+- Some of those $\beta$s might actually be 0. That's what we assume
+  when we remove a variable.
+
+## R formula
+
+- A formula to estimate all of those in R would be
+```
+lm(ex ~ ecab + met + grow + young +  old + region, data = dat)
+```
+
+- That's the "kitchen sink" model. (Ridicule)
+  
+
+
+
+## Fit a multiple regression model
+```{r m1}
+m1 <-lm(ex ~ ecab + met + grow, data = dat)
+```
+
+- m1 is an "object", meaning an entity that
+	- holds some data
+	- for which we have functions to "extract" and view the data
+
+
+## Summary is the most frequently used follow-up {.allowframebreaks}
+- If you are used to SAS or SPSS, the R output from summary will be
+most similar to the usual "regression table"
+
+```{r}
+summary(m1)
+```
+
+## Lets stop and think
+- Thats just the "vanilla" output, the material that social customs
+call for (among statistical programmers)
+- Take a moment to
+	- Write out the theoretical model (with betas!)
+	- Write out the equation for calculating predicted values
+
+## The R philosophy: interrogate the fitted model object{.allowframebreaks}
+
+- Ever wonder how many functions you could apply to an object of that
+type?
+
+```{r}
+methods(class = class(m1))
+```
+
+- In this class, we will eventually discuss about 9 of these (have to
+  leave some work for tomorrow)
+
+
+## You can dissect the summary output
+
+- Sometimes, it is impossible to get your work done with the standard
+summary, so you can tear into the model and its summary.
+
+- There are various ways to grab numbers from the guts of m1, the
+recommended way is to use accessor methods, but sometimes we grab
+directly.
+
+- See what you might grab like this
+```{r}
+names(m1)
+```
+
+- Perhaps smarter to run attributes (almost same, except shows class)
+```{r}
+attributes(m1)
+```
+
+## Lets catch a summary object!
+
+```{r s10}
+m1sum <- summary(m1)
+```
+- Notice not so many pre-manufactured  accessor or follow-up functions
+```{r s20}
+methods(class = class(m1sum))
+```
+
+- If there is no method to retrieve what you need, a linear model
+summary object allows access with the $ notation
+```{r 30}
+m1sum$r.squared
+```
+
+- Can retrieve every named thing in the same way
+
+```{r a30}
+attributes(m1sum)
+```
+## Extract the coefficient table{.allowframebreaks}
+
+```{r}
+coefficients(m1sum)
+```
+
+- That's preferred to, but currently, the same as
+
+```{r}
+m1sum$coefficients
+```
+
+## residuals{.allowframebreaks}
+- Could grab the residuals from either m1 or m1sum
+```{r}
+m1sum$resid
+```
+or
+
+```{r}
+m1$resid
+```
+
+- There's a method for that, R team prefers you use it
+
+```{r}
+resid(m1)
+```
+
+
+
+## Formula are very flexible
+
+- R uses the so-called Wilkinson \& Rogers (W \& R) formula
+
+- Allows some math, we'll get to that later
+
+- Right now, we need to warn you, "*" does not mean times!
+
+```
+lm(ex ~ ecab * met, data = dat)
+```
+
+will estimate a model that includes
+    - <i>ecab</i>, and
+    - <i>met</i>, and also
+	- <i>ecab:met</i> which, oddly enough, means multiplication!
+
+
+## Plotting
+
+## (1) termplot()
+
+- Its supplied with R, so everyboy supposes you know it.
+- Displays the predicted Y against Xs.
+	- termplot() will generate one plot for each predictor. 
+- par(mfrow=..)  combined plots into a single figure
+
+```{r tp10}
+par(mfrow = c(2, 2))
+termplot(m1, se = TRUE, partial.resid = TRUE)
+par(mfrow = c(1,1)) # change back to the original layout 
+```
+
+## Choose a particular predictor
+
+- Read ?termplot, see the "terms" argument
+
+```{r tp20}
+termplot(m1,  se = TRUE, partial.resid = TRUE, terms = "ecab")
+```
+
+- Save to file
+```{r tp30, eval=FALSE}
+pdf(file = "m1.ecab.pdf", onefile = FALSE, paper = "special")
+termplot(m1,  se = TRUE, partial.resid = TRUE, terms = "ecab")
+dev.off()
+```
+
+## Predict for "mix and match" of variables{.allowframebreaks}
+
+```{r, include=FALSE)
+library(rockchalk)
+```
+
+- With no details, it will choose a range of values for each variable,
+  one at a time, and then sets the other variables at central values
+
+```{r p10}
+predictOMatic(m1, interval = "confidence")
+```
+
+- That's the "default", same as running
+```{r p15, eval = FALSE}
+predictOMatic(m1, predVals = "margins", interval = "confidence")
+```
+
+- The "auto" argument causes a complete mix-and-match
+```{r p20}
+predictOMatic(m1, predVals = "auto", intervals = "confidence")
+```
+
+- The predVals "predictor values" argument is flexible
+```{r p30}
+# predictOMatic(m1, predVals = list(ecab = "std.dev", met = "quantile"), intervals = "confidence")
+```
+                                        
+- In case predictOMatic fails you, drop back to inspect the newdata
+  function.
+```{r nd10}
+new1 <- newdata(m1, predVals="auto", divider="quantile") # quantile is default
+new1
+predict(m1, newdata = new1)
+```
+- You can use <i>new1</i> as a <i>newdata</i> object in any of the R
+  predict methods.
+
+
+## (2) rockchalk::plotPlane()
+- creates a 3D plot of the predicted Y against a plane formed by two Xs. 
+```{r pp10}
+plotPlane(m1, plotx1 = "ecab", plotx2 = "met")
+```
+
+- This function has quite a few arguments that can be used to beautify
+  the output
+
+
+## The fancy t-test
+
+- The difficult thing for most students is imagining a situation in
+which they would actually want to know if two coefficients are
+actually equal.
+
+- consider the garbage can model
+
+```{r}
+m2 <- lm(ex ~ ecab + met + grow + old + young, data = dat)
+```
+
+- We wonder whether the coefficient of "grow" (b3) is significantly
+different from the coefficient of "young" (b5).
+
+- To do that, we need to calculate this t statistic
+
+$$
+\hat{t} = \frac{\hat{\beta_3}-\hat{\beta_5}}{std.err.(\hat{\beta_3}-\hat{\beta_5})}
+$$
+
+- To calculate the denominator, we need to get the values of the
+  variances and covariance of $\beta_3$ and $\beta_5$
+
+- Its easier to believe that estimates for all those values
+<i>could</i> be retrieved than to actually do it.
+
+- Class controversy in past 3 years is whether PJ should write a
+function to "just do it".  So far, the majority view has been
+	- This is not very difficult, people can do it.
+
+
+m2sum <- summary(m2)
+
+m2sum$coef  # returns a matrix of the t table.
+
+m2sum$coef[ ,1] # returns the first column of the t table, which contains the regression coefficients. 
+- Note that b3 is the fourth element, and b5 is the sixth element in the vector.
+
+- Give a name to the result of vcov(m2). The result is a matrix. 
+vc <- vcov(m2) 
+
+- Again, we use [,] to specify the elements in the matrix. 
+- For example, vc[4,6] is the element in the forth row and the six column.
+
+fancyt <- (m2sum$coef[4,1] - m2sum$coef[6,1])/sqrt(
+                          vc[4,4]+vc[6,6]-2* vc[4,6])
+fancyt 
+
+- Finally, we can get a p-value for this "fancy t-test":
+pt(fancyt, 42, lower.tail=FALSE)
+- 42 is our degrees of freedom for the t-test, obtained from summary(m2).
+- Since "fancyt" is positive, we want the probability of scoring higher than it (lower.tail=FALSE);
+- if it were negative, we would want the probability of scoring lower than it (lower.tail=TRUE).
+- If the probability is less than 0.025 or greater than 0.975, 
+- the estimates are significantly different (given alpha = 0.05).
+ In this case, the effects of the two predictors are not significantly different from the other.
+
+
