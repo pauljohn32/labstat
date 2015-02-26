@@ -78,7 +78,7 @@ table(dat$region)
 
 - A model with a lot of variables:
 $$
-ex_i = \beta_0 + \beta_1 ecab_i + \beta_2 met_i + \beta_3 grow +
+ex_i = \beta_0 + \beta_1 ecab_i + \beta_2 met_i + \beta_3 grow_i +
 $$
 $$
 \beta_4 young_i + \beta_5 old_i + \beta_6 regionWest_i + e_i
