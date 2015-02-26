@@ -336,6 +336,8 @@ $$
 function to "just do it".  So far, the majority view has been
 	- This is not very difficult, people can do it.
 
+- But most of the ways people find are trouble.
+
 
 m2sum <- summary(m2)
 
